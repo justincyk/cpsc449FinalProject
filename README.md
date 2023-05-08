@@ -9,3 +9,15 @@
 check
 
 ```pip3 list```
+
+Install uvicorn
+
+```pip3 install "uvicorn[standard]"```
+
+Run uvicorn server
+
+```uvicorn main:app --reload```
+
+You can also run the server with
+
+```uvicorn main:app --host 0.0.0.0 --port 80```
