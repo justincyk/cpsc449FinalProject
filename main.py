@@ -3,77 +3,14 @@ from fastapi import FastAPI, Body, HTTPException, status
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field
-from bson import ObjectId
-from typing import Optional, List
+from typing import List
 import motor.motor_asyncio
+from models import BookModel, UpdatedBookModel
 
 URL = "mongodb+srv://bookstoreAdmin:9QTngUHHhULpVK6V@cluster0.dm3qvxd.mongodb.net/?retryWrites=true&w=majority"
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(URL)
 db = client.bookstore
-
-
-# helper class to resolve ObjectId
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, v):
-        if not ObjectId.is_valid(v):
-            raise ValueError("Invalid objectid")
-        return ObjectId(v)
-
-    @classmethod
-    def __modify_schema__(cls, field_schema):
-        field_schema.update(type="string")
-
-
-# Book Model
-class BookModel(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    title: str = Field(...)
-    author: str = Field(...)
-    description: str = Field(...)
-    price: float = Field(...)
-    stock: int = Field(...)
-
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
-        schema_extra = {
-            "example": {
-                "title": "The Obscene Bird of Night",
-                "author": "José Donoso",
-                "description": "A Chiliean Classic",
-                "price": "16.00",
-                "stock": "210",
-            }
-        }
-
-
-class UpdatedBookModel(BaseModel):
-    title: Optional[str]
-    author: Optional[str]
-    description: Optional[str]
-    price: Optional[float]
-    stock: Optional[int]
-
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
-        schema_extra = {
-            "example": {
-                "title": "The Obscene Bird of Night",
-                "author": "José Donoso",
-                "description": "A Chiliean Classic",
-                "price": "16.00",
-                "stock": "210",
-            }
-        }
 
 
 @app.get("/")
