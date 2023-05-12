@@ -3,7 +3,7 @@ from fastapi import FastAPI, Body, HTTPException, status
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError, validator
 from bson import ObjectId
 from typing import Optional, List
 import motor.motor_asyncio
@@ -31,14 +31,32 @@ class PyObjectId(ObjectId):
         field_schema.update(type="string")
 
 
+def normalize(name: str) -> str:
+    return ' '.join((word.capitalize()) for word in name.split(' '))
+
 # Book Model
+
+
 class BookModel(BaseModel):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
     title: str = Field(...)
     author: str = Field(...)
-    description: str = Field(...)
-    price: float = Field(...)
-    stock: int = Field(...)
+    description: str = Field(max_length=300)
+    price: float = Field(
+        gt=0, description="The price must be greater than zero")
+    stock: int = Field(gt=0, description="The stock must be greater than zero")
+
+    # validators
+    @validator('author')
+    def author_validator(cls, value):
+        if ' ' not in value:
+            raise ValueError('Author must contain first and last name')
+        return value.title()
+
+    _normalize_title = validator('title', allow_reuse=True)(normalize)
+    _normalize_author = validator('author', allow_reuse=True)(normalize)
+    _normalize_description = validator(
+        'description', allow_reuse=True)(normalize)
 
     class Config:
         allow_population_by_field_name = True
