@@ -7,16 +7,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from pydantic_mongo import AbstractRepository, ObjectIdField
 from bson import ObjectId
-
+import asyncio
+import pymotyc
 
 uri = "mongodb+srv://bookstoreAdmin:9QTngUHHhULpVK6V@cluster0.dm3qvxd.mongodb.net/?retryWrites=true&w=majority"
 
 app = FastAPI()
 
-# Initialize MongoDB Client
-client = AsyncIOMotorClient(uri)
-bookstoreDb = client['bookstore']
-books = bookstoreDb['books']
 
 # Book Model
 
@@ -29,49 +26,51 @@ class Book(BaseModel):
     price: float
     stock: int
 
-    class Config:
-        # The ObjectIdField creates an bson ObjectId value, so its necessary to setup the json encoding
-        json_encoders = {ObjectId: str}
+    # class Config:
+    #     # The ObjectIdField creates an bson ObjectId value, so its necessary to setup the json encoding
+    #     json_encoders = {ObjectId: str}
 
 
-class BookRepository(AbstractRepository[Book]):
-    class Meta:
-        collection_name = 'books'
+class BookStore:
+    books: pymotyc.Collection[Book]
+# class BookRepository(AbstractRepository[Book]):
+#     class Meta:
+#         collection_name = 'books'
 
 
-book_repository = BookRepository(database=books)
+# Initialize MongoDB Client
+client = AsyncIOMotorClient(uri)
+bookstoreDb = client['bookstore']
+books = bookstoreDb['books']
+
+# book_repository = BookRepository(database=bookstoreDb)
 
 
-# Send a ping to confirm a successful connection
-# try:
-#     client.admin.command('ping')
-#     print("Pinged your deployment. You successfully connected to MongoDB!")
-# except Exception as e:
-#     print(e)
-
-
-# print(books.find_one())
-
-
+# remove later
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
 
 
+# remove later
 @app.get("/firstbook")
 async def root():
     try:
-        # result = await book_repository.find_one_by({"author": "Jose Donoso"})
-        # return result
         result = await books.find_one()
         return {"message": result["title"] + " by " + result["author"]}
     except DuplicateKeyError:
         return {"error": "Duplicate key error"}
 
 
+# return all the books in the database
 @app.get("/books")
 async def get_books():
     try:
+        cursor = books.find({})
+        documents = await cursor.to_list(length=None)
+        print(type(documents))
+        # cursor = books.find({})
+        # result = books.to_list(length=None)
         return {"message": "to do"}
     except DuplicateKeyError:
         return {"error": "Duplicate key error"}
