@@ -70,7 +70,7 @@ class Book(BaseModel):
 @app.get("/books")
 async def get_books():
     books = []
-    for book in booksCollection.find():
+    for book in booksCollection.find({}):
         books.append(book)
     return books
 
