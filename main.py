@@ -76,6 +76,49 @@ async def delete_book(id: str):
         raise HTTPException(status_code=404, detail=f"Book {id} not found")
 
 
+@app.get("/search", response_description="Searches for books by title, author, and price range")
+async def search(title: str = None, author: str = None, min_price: float = None, max_price: float = None):
+    searchQuery = {}
+    if title:
+        searchQuery["title"] = title
+    if author:
+        searchQuery["author"] = author
+    if min_price and max_price:
+        searchQuery["price"] = {"$gte": min_price, "$lte": max_price}
+    elif min_price:
+        searchQuery["price"] = {"$gte": min_price}
+    elif max_price:
+        searchQuery["price"] = {"$lte": max_price}
+    print(searchQuery, flush=True)
+    result = await db["books2"].find(searchQuery).to_list(length=None)
+    if len(result) > 0:
+        return result
+    else:
+        raise HTTPException(status_code=404, detail=f"No books found matching those filters")
+
+
+@app.get("/stats")
+async def get_stats():
+
+    bestsellers_cursor = db['books2'].aggregate([{"$sort": {"stock":-1}}, {"$limit":5}])
+    bestsellers = await bestsellers_cursor.to_list(None)
+    bestsellers_titles = [book["title"] for book in bestsellers]
+    bestsellers_authors = [book['author'] for book in bestsellers]
+
+    total_books_cursor = db['books2'].aggregate([{"$group": {"_id": None, "number_of_books": {"$sum": 1}}}])
+    total_books = await total_books_cursor.to_list(None)
+    total_books = list(total_books)[0]['number_of_books']
+
+    total_stock_cursor = db['books2'].aggregate([{"$group": {"_id": None, "total_stock": {"$sum": "$stock"}}}])
+    total_stock = await total_stock_cursor.to_list(None)
+    total_stock = list(total_stock)[0]["total_stock"]
+    return {
+        "total_books": total_stock,
+        "bestsellers": bestsellers_titles,
+        "top_authors": bestsellers_authors,
+    }
+
+
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
