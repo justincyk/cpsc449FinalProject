@@ -92,30 +92,36 @@ async def search(title: str = None, author: str = None, min_price: float = None,
         searchQuery["price"] = {"$lte": max_price}
     print(searchQuery, flush=True)
     if len(searchQuery) == 0:
-        raise HTTPException(status_code=404, detail=f"Need to provide at least 1 filter and choose only from the following: title, author, min_price, max_price")
+        raise HTTPException(
+            status_code=404, detail=f"Need to provide at least 1 filter and choose only from the following: title, author, min_price, max_price")
     result = await db["books2"].find(searchQuery).to_list(length=None)
     if len(result) > 0:
         return result
     else:
-        raise HTTPException(status_code=404, detail=f"No books found matching those filters")
+        raise HTTPException(
+            status_code=404, detail=f"No books found matching those filters")
 
 
-@app.get("/stats", response_description="Retrieve statistics of the total number of books in the store, the top 5 best selling books, and top 5 authors with the most books")
+@app.get("/aggregation", response_description="Retrieve statistics of the total number of books in the store, the top 5 best selling books, and top 5 authors with the most books")
 async def get_stats():
 
-    bestsellers_cursor = db['books2'].aggregate([{"$sort": {"stock":-1}}, {"$limit":5}])
+    bestsellers_cursor = db['books2'].aggregate(
+        [{"$sort": {"stock": -1}}, {"$limit": 5}])
     bestsellers = await bestsellers_cursor.to_list(None)
     topTitles = [book["title"] for book in bestsellers]
 
-    topAuthors_cursor = db['books2'].aggregate([{"$group": {"_id": "$author", "total_stock": {"$sum": "$stock"}}}, {"$sort": {"total_stock":-1}}, {"$limit":5}])
+    topAuthors_cursor = db['books2'].aggregate([{"$group": {"_id": "$author", "total_stock": {
+                                               "$sum": "$stock"}}}, {"$sort": {"total_stock": -1}}, {"$limit": 5}])
     topAuthors = await topAuthors_cursor.to_list(None)
     topAuthors = [book["_id"] for book in topAuthors]
 
-    total_books_cursor = db['books2'].aggregate([{"$group": {"_id": None, "number_of_books": {"$sum": 1}}}])
+    total_books_cursor = db['books2'].aggregate(
+        [{"$group": {"_id": None, "number_of_books": {"$sum": 1}}}])
     total_books = await total_books_cursor.to_list(None)
     total_books = list(total_books)[0]['number_of_books']
 
-    total_stock_cursor = db['books2'].aggregate([{"$group": {"_id": None, "total_stock": {"$sum": "$stock"}}}])
+    total_stock_cursor = db['books2'].aggregate(
+        [{"$group": {"_id": None, "total_stock": {"$sum": "$stock"}}}])
     total_stock = await total_stock_cursor.to_list(None)
     total_stock = list(total_stock)[0]["total_stock"]
 
