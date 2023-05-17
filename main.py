@@ -13,15 +13,10 @@ client = motor.motor_asyncio.AsyncIOMotorClient(URL)
 db = client.bookstore
 
 #Creating Indexes   
-async def index():
-    await db["books2"].create_index([("field_name", motor.motor_asyncio.ASCENDING)])
-    await db["books2"].create_index([("field1", motor.motor_asyncio.ASCENDING), ("field2", motor.motor_asyncio.DESCENDING)])
-    await db["books2"].create_index("unique_field", unique=True)
-    await db["books2"].create_index("field", partialFilterExpression={"field": {"$exists": True}})
-    
-@app.onstart("startup")
-async def startup():
-    await index()
+await db["books2"].create_index("_id")
+await db["books2"].create_index("title")
+await db["books2"].create_index("author")
+await db["books2"].create_index("price")
     
 
 @app.get("/")
