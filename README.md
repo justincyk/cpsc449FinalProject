@@ -9,21 +9,10 @@
 1. Cd to the project directory `cd /path/to/project`
 2. Activate the environment `source bin/activate`
 3. Install requirements `pip install -r requirements.txt`
+4. Run uviorn server `uvicorn main:app --reload`
 
-check
-
-```pip3 list```
-
-##### Install uvicorn
-
-```pip3 install "uvicorn[standard]"```
-
-#### Run uvicorn server
-
-```uvicorn main:app --reload```
-
-#### To View API Schema
-
-```http://127.0.0.1:8000/redoc```
-
+### How to Access API Schema While Uvicorn Server is Running
+1. Go on web browser and go to `http://127.0.0.1:8000/redoc`
+2. API Schema will display and describe each API endpoint
+3. Test API endpoint using Postman
 
