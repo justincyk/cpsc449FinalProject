@@ -1,10 +1,14 @@
-# CPSC449 Group Project Final
+# 449 Final Project
 
-## Final Project Team 14: Nicholas Caro, Justin Kim
+## CPSC 449 Sec 02 Class Number 13992 Spring 2023
 
-### How to run 
+## Developers: Nicholas Caro, Justin Kim, Andrew Jung
 
-```source bin/activate```
+### How To Run Via Terminal
+
+1. Cd to the project directory `cd /path/to/project`
+2. Activate the environment `source bin/activate`
+3. Install requirements `pip install -r requirements.txt`
 
 check
 
