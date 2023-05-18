@@ -11,6 +11,13 @@ URL = "mongodb+srv://bookstoreAdmin:9QTngUHHhULpVK6V@cluster0.dm3qvxd.mongodb.ne
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(URL)
 db = client.bookstore
+collection = db["books2"]
+
+# Creating Indexes
+collection.create_index("_id")
+collection.create_index("title")
+collection.create_index("author")
+collection.create_index("price")
 
 
 @app.get("/")
