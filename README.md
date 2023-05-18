@@ -16,3 +16,11 @@
 2. API Schema will display and describe each API endpoint
 3. Test API endpoint using Postman
 
+### Design Choices and Implementation
+1. uvicorn for server to see FastAPI
+2. FastAPI to implement APIs
+3. Pydantic models for data models and data validation
+4. MongoDB for database
+5. PyMongo to establish connection with MongoDB
+6. Async for asynchronous connection
+
