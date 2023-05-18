@@ -11,18 +11,18 @@ URL = "mongodb+srv://bookstoreAdmin:9QTngUHHhULpVK6V@cluster0.dm3qvxd.mongodb.ne
 app = FastAPI()
 client = motor.motor_asyncio.AsyncIOMotorClient(URL)
 db = client.bookstore
+collection = db["books2"]
 
-#Creating Indexes   
-await db["books2"].create_index("_id")
-await db["books2"].create_index("title")
-await db["books2"].create_index("author")
-await db["books2"].create_index("price")
-    
+# Creating Indexes
+collection.create_index("_id")
+collection.create_index("title")
+collection.create_index("author")
+collection.create_index("price")
+
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Book Store"}
-
 
 
 @app.get("/books",
