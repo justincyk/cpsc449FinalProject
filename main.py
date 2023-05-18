@@ -13,10 +13,11 @@ client = motor.motor_asyncio.AsyncIOMotorClient(URL)
 db = client.bookstore
 
 #Creating Indexes   
-await db["books2"].create_index("_id")
-await db["books2"].create_index("title")
-await db["books2"].create_index("author")
-await db["books2"].create_index("price")
+async def index():
+    await db["books2"].create_index("_id")
+    await db["books2"].create_index("title")
+    await db["books2"].create_index("author")
+    await db["books2"].create_index("price")
     
 
 @app.get("/")
